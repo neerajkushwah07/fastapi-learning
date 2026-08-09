@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Path
+from enum import Enum
 
 app = FastAPI()
 
@@ -18,12 +19,14 @@ def contact():
     return {"email": "neeraj@gmail.com"}
 
 @app.get("/users/{user_id}")
-def get_user(user_id: int):
-    return {"User ID": user_id}
+def get_user(user_id: int = Path(gt=0)):
+    return {
+        "user_id": user_id
+        }
 
-@app.get("/products/{product_id}")
-def get_product(product_id:int):
-    return {"Product ID": product_id}
+# @app.get("/products/{product_id}")
+# def get_product(product_id:int):
+#     return {"Product ID": product_id}
 
 @app.get("/students/{student_id}/courses/{course_name}")
 def student_info(student_id: int, course_name: str):
@@ -64,4 +67,112 @@ def product_list(
         "category": category,
         "page": page,
         "limit": limit
+    }
+
+@app.get("/users/{username}")
+def get_user(
+    username:str = Path(min_length=3, max_length=20)
+):
+    return {
+        "username":username
+    }
+
+
+
+@app.get("/products/{price}")
+def get_product(price: float):
+    return {
+        "price": price
+    }
+
+@app.get("/status/{active}")
+def status(active: bool):
+    return {
+        "active": active
+    } 
+
+@app.get("/users/{user_id}/orders/{order_id}")
+def get_order(user_id: int, order_id: int):
+    return {
+        "user_id": user_id,
+        "order_id": order_id
+    }
+
+@app.get("/users/{user_id}")
+def get_user(user_id: int = Path(
+    title= "Users",
+    gt=0,
+    description= "User Id Must be an integer"
+)):
+    return {
+        "user_id": user_id
+    }
+
+@app.get("/products/{product_id}")
+def get_product(product_id: int = Path(
+    gt=1,
+    lt=100000,
+    title= "Products",
+    description= "Product Id Must be an Integer"
+)):
+    return {
+        "product_id": product_id
+    }
+
+
+
+@app.get("/username/{username}")
+def get_username(username: str = Path(
+    min_length=3,
+    max_length=20,
+    title= "Username",
+    description= "Username Must be string"
+)):
+    return {
+        "username": username
+    }
+
+@app.get("/users/{user_id}/orders/{order_id}")
+def get_user_order(
+    user_id: int = Path(gt=0, title= "User ID"),
+    order_id: int = Path(gt=0, title="Order ID"),
+):
+    return {
+        "user_id": user_id,
+        "order_id": order_id
+    }
+
+"Enum Usage"
+
+class UserRole(str, Enum):
+    admin= "admin"
+    manager = "manager"
+    customer = "customer"
+
+@app.get("/users/role/{role}")
+def get_user_role(
+    role: UserRole = Path(
+        title= "Role",
+        description= "User Role"
+    )
+):
+    return {
+        "role": role
+    }
+
+class PaymentStatus(str, Enum):
+    pending = "pending"
+    paid = "paid"
+    failed = "failed"
+    refunded = "refunded"
+
+@app.get("/payments/{status}")
+def payment_status(
+    status: PaymentStatus = Path(
+        title= "Payment Status",
+        description= "Current Payment Status"
+    )
+):
+    return {
+        "payment_status": status
     }
